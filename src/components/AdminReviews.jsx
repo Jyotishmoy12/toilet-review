@@ -15,10 +15,7 @@ const AdminReviews = () => {
         const ratingsRef = collection(db, "ratings");
         const q = query(ratingsRef, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
-        const reviewsData = [];
-        querySnapshot.forEach((docSnap) => {
-          reviewsData.push({ id: docSnap.id, ...docSnap.data() });
-        });
+        const reviewsData = querySnapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
         setReviews(reviewsData);
       } catch (e) {
         console.error("Error fetching reviews:", e);
@@ -36,7 +33,6 @@ const AdminReviews = () => {
 
     try {
       await deleteDoc(doc(db, "ratings", reviewId));
-      // Remove deleted review from state
       setReviews((prevReviews) => prevReviews.filter((review) => review.id !== reviewId));
     } catch (e) {
       console.error("Error deleting review:", e);
@@ -45,39 +41,35 @@ const AdminReviews = () => {
   };
 
   if (loading) {
-    return (
-      <div className="p-4 text-center">
-        <p>Loading reviews...</p>
-      </div>
-    );
+    return <div className="p-4 text-center"><p>Loading reviews...</p></div>;
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        <p>{error}</p>
-      </div>
-    );
+    return <div className="p-4 text-center text-red-500"><p>{error}</p></div>;
   }
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">All Reviews</h2>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-center">All Reviews</h2>
       {reviews.length === 0 ? (
-        <p className="text-gray-500">No reviews available.</p>
+        <p className="text-gray-500 text-center">No reviews available.</p>
       ) : (
-        reviews.map((review) => (
-          <div key={review.id} className="border rounded-md p-4 mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <div>
-                <p className="font-semibold">
-                  {review.userName} ({review.userEmail})
-                </p>
-                <p className="text-sm text-gray-500">
-                  {review.createdAt?.toDate 
-                    ? review.createdAt.toDate().toLocaleString() 
-                    : "Unknown date"}
-                </p>
+        <div className="space-y-4">
+          {reviews.map((review) => (
+            <div key={review.id} className="border rounded-lg p-4 shadow-md hover:shadow-lg transition duration-200">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <p className="font-semibold">{review.userName} ({review.userEmail})</p>
+                  <p className="text-sm text-gray-500">{review.createdAt?.toDate ? review.createdAt.toDate().toLocaleString() : "Unknown date"}</p>
+                </div>
+                {user?.email === adminEmail && (
+                  <button 
+                    onClick={() => handleDelete(review.id)}
+                    className="text-red-500 text-sm hover:underline hover:text-red-700 transition"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex">
@@ -93,24 +85,12 @@ const AdminReviews = () => {
                     </svg>
                   ))}
                 </div>
-                {user?.email === adminEmail && (
-                  <button 
-                    onClick={() => handleDelete(review.id)}
-                    className="text-red-500 text-sm hover:underline"
-                  >
-                    Delete
-                  </button>
-                )}
               </div>
+              {review.comment && <p className="text-gray-700 mt-2">{review.comment}</p>}
+              <p className="text-sm text-gray-500 mt-1">Toilet ID: <span className="font-mono text-blue-600">{review.toiletId}</span></p>
             </div>
-            {review.comment && (
-              <p className="text-gray-700 mb-2">{review.comment}</p>
-            )}
-            <p className="text-sm text-gray-500">
-              Toilet ID: <span className="font-mono">{review.toiletId}</span>
-            </p>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );
