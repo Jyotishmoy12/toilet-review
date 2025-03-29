@@ -21,11 +21,14 @@ const AdminDashboard = () => {
 
   // Get the base URL for QR codes (localhost in development, real domain in production)
   const getBaseUrl = () => {
-    return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    const base = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? `${window.location.protocol}//${window.location.host}`
-      : "https://yourapp.com";
+      : "https://toilet-review-eta.vercel.app";
+    console.log("Base URL:", base);
+    return base;
   };
-
+  
+  
   useEffect(() => {
     fetchToilets();
   }, []);
@@ -79,10 +82,10 @@ const AdminDashboard = () => {
       alert("Please enter location and at least the first image (thumbnail).");
       return;
     }
-
+  
     setLoading(true);
     try {
-      // Prepare toilet data
+      // Prepare toilet data without the qrCode field initially
       const toiletData = { 
         location, 
         thumbnail: images.image1,
@@ -92,13 +95,12 @@ const AdminDashboard = () => {
           image3: images.image3 || ""
         }
       };
-
+  
       if (editMode && currentToiletId) {
         // Update existing toilet
         const toiletRef = doc(db, "toilets", currentToiletId);
         await updateDoc(toiletRef, toiletData);
         
-        // Update state
         setToilets(toilets.map(toilet => 
           toilet.id === currentToiletId ? { ...toilet, ...toiletData } : toilet
         ));
@@ -106,21 +108,21 @@ const AdminDashboard = () => {
         alert("Toilet updated successfully!");
       } else {
         // Add new toilet
-        const toiletId = Math.random().toString(36).substr(2, 9);
-        const qrCodeLink = `${getBaseUrl()}/toilet/${toiletId}`;
-
-        const newToilet = { ...toiletData, qrCode: qrCodeLink };
-        const docRef = await addDoc(collection(db, "toilets"), newToilet);
+        const docRef = await addDoc(collection(db, "toilets"), toiletData);
         
-        // Add to state with the generated Firestore ID
-        setToilets([...toilets, { id: docRef.id, ...newToilet }]);
+        // Generate the QR Code link using the Firestore document id
+        const qrCodeLink = `${getBaseUrl()}/toilet/${docRef.id}`;
+        
+        // Update the newly created document with the qrCode field
+        await updateDoc(doc(db, "toilets", docRef.id), { qrCode: qrCodeLink });
+        
+        // Add the new toilet with the qrCode to local state
+        setToilets([...toilets, { id: docRef.id, ...toiletData, qrCode: qrCodeLink }]);
+        
         alert("Toilet added successfully!");
       }
       
-      // Reset form immediately after successful submission
       resetForm();
-      
-      // Reset file input fields by clearing their values
       resetFileInputs();
       
     } catch (error) {
@@ -130,6 +132,7 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+  
 
   // Reset file input fields
   const resetFileInputs = () => {
@@ -403,13 +406,14 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-center justify-center">
-                    <QRCodeCanvas 
-                      id={`qr-${toilet.id}`} 
-                      value={toilet.qrCode} 
-                      size={120}
-                      level="H"
-                      includeMargin={true}
-                    />
+                  <QRCodeCanvas 
+  id={`qr-${toilet.id}`} 
+  value={`${getBaseUrl()}/toilet/${toilet.id}`} 
+  size={120}
+  level="H"
+  includeMargin={true}
+/>
+
                     <div className="text-xs text-gray-500 mt-1">
                       {window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
                         ? "localhost version"
