@@ -37,7 +37,7 @@ const HeroSection = () => {
             </button>
           </div>
           
-          <div className="flex flex-wrap justify-center md:justify-start gap-8 text-gray-700">
+          {/* <div className="flex flex-wrap justify-center md:justify-start gap-8 text-gray-700">
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-full mr-3">
                 <MapPin size={20} className="text-blue-600" />
@@ -56,7 +56,7 @@ const HeroSection = () => {
                 <p className="text-gray-600">Happy Users</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
         
         {/* Right content - illustration */}
