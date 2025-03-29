@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
@@ -9,6 +9,7 @@ const Navbar = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.email === "subedi@gmail.com") {
@@ -21,6 +22,8 @@ const Navbar = () => {
   const handleLogout = async () => {
     await signOut(auth);
     setMobileMenuOpen(false);
+    // Redirect to home after logout
+    navigate("/");
   };
 
   const toggleMobileMenu = () => {

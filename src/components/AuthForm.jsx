@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword, 
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup, 
 } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom"; // <-- Import useLocation
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react";
@@ -21,6 +21,7 @@ const AuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formValid, setFormValid] = useState(false);
+  
 
   // Validate form
   const validateForm = () => {

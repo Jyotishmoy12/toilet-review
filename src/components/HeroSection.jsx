@@ -1,7 +1,9 @@
 import React from 'react';
 import { MapPin, Star, Scan, Users, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-gray-100 text-center px-6 py-16">
       {/* Background decoration */}
@@ -25,11 +27,11 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mb-8">
-            <button className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center">
+            <button className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center cursor-pointer" onClick={() => navigate('/toilets')}>
               <Search size={20} className="mr-2" />
               Find Toilets
             </button>
-            <button className="bg-green-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition shadow-md flex items-center justify-center">
+            <button className="bg-green-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition shadow-md flex items-center justify-center cursor-pointer" onClick={() => navigate('/toilets')}>
               <Star size={20} className="mr-2" />
               Add a Review
             </button>
@@ -71,7 +73,7 @@ const HeroSection = () => {
               <div className="p-4">
                 <div className="bg-gray-100 rounded-lg p-4 mb-3">
                   <div className="flex justify-between items-center mb-3">
-                    <div className="font-medium">Central Park Restroom</div>
+                    <div className="font-medium">Civil Engineering</div>
                     <div className="flex text-yellow-500">
                       <Star size={16} fill="currentColor" />
                       <Star size={16} fill="currentColor" />
@@ -81,7 +83,7 @@ const HeroSection = () => {
                     </div>
                   </div>
                   <div className="text-xs text-gray-500 flex items-center mb-1">
-                    <MapPin size={12} className="mr-1" /> 500m away
+                    <MapPin size={12} className="mr-1" /> 1km away
                   </div>
                   <div className="flex gap-2 mt-2">
                     <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">Accessible</span>
