@@ -6,9 +6,11 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup, 
+  updateProfile
 } from "firebase/auth";
-import { useNavigate, useLocation } from "react-router-dom"; // <-- Import useLocation
-import { Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom"; 
+import { Eye, EyeOff, Mail, Lock, AlertCircle, User } from "lucide-react";
+import Navbar from "../components/Navbar"
 
 const AuthForm = () => {
   const { login } = useAuth();
@@ -16,6 +18,7 @@ const AuthForm = () => {
   const location = useLocation(); // <-- Get location
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,21 +30,22 @@ const AuthForm = () => {
   const validateForm = () => {
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const validPassword = password.length >= 6;
+    const validUsername = isSignup ? username.trim().length >= 3 : true;
     
-    setFormValid(validEmail && validPassword);
-    return validEmail && validPassword;
+    setFormValid(validEmail && validPassword && validUsername);
+    return validEmail && validPassword && validUsername;
   };
 
   // Update validation when inputs change
   useState(() => {
     validateForm();
-  }, [email, password]);
+  }, [email, password, username]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
-      setError("Please enter a valid email and password (min 6 characters)");
+      setError("Please enter a valid email, username (min 3 chars), and password (min 6 chars)");
       return;
     }
     
@@ -50,7 +54,10 @@ const AuthForm = () => {
 
     try {
       if (isSignup) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await updateProfile(user, { displayName: username });
+        await user.reload();
       } else {
         await login(email, password);
       }
@@ -99,6 +106,8 @@ const AuthForm = () => {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="flex justify-center items-center  py-8">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
@@ -113,6 +122,27 @@ const AuthForm = () => {
         )}
         
         <form onSubmit={handleSubmit} className="space-y-3">
+          {isSignup && (
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <div className="relative mt-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User size={16} className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  id="username"
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-10 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+          )}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email Address
@@ -215,6 +245,7 @@ const AuthForm = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
